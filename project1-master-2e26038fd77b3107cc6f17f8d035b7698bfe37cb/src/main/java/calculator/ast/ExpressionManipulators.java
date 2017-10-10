@@ -3,6 +3,7 @@ package calculator.ast;
 import calculator.interpreter.Environment;
 import calculator.errors.EvaluationError;
 import datastructures.interfaces.IDictionary;
+import datastructures.interfaces.IList;
 import misc.exceptions.NotYetImplementedException;
 
 /**
@@ -39,36 +40,34 @@ public class ExpressionManipulators {
                 throw new EvaluationError("Undefined variable: " + node.getName());
             }
             // TODO: your code here
-            return variables.get(node.getName());
+            return variables.get(node.getName()).getNumericValue();
         } else {
             String name = node.getName();
 
             // TODO: your code here
-
+            IList<AstNode> nodeChildren = node.getChildren();
+            
             if (name.equals("+")) {
                 // TODO: your code here
-                throw new NotYetImplementedException();
+                return toDoubleHelper(variables, nodeChildren.get(0)) + toDoubleHelper(variables, nodeChildren.get(1));
             } else if (name.equals("-")) {
                 // TODO: your code here
-                throw new NotYetImplementedException();
+                return toDoubleHelper(variables, nodeChildren.get(0)) - toDoubleHelper(variables, nodeChildren.get(1));
             } else if (name.equals("*")) {
                 // TODO: your code here
-                throw new NotYetImplementedException();
+                return toDoubleHelper(variables, nodeChildren.get(0)) * toDoubleHelper(variables, nodeChildren.get(1));
             } else if (name.equals("/")) {
                 // TODO: your code here
-                throw new NotYetImplementedException();
+                return toDoubleHelper(variables, nodeChildren.get(0)) / toDoubleHelper(variables, nodeChildren.get(1));
             } else if (name.equals("^")) {
                 // TODO: your code here
-                throw new NotYetImplementedException();
+                return Math.pow(toDoubleHelper(variables, nodeChildren.get(0)), toDoubleHelper(variables, nodeChildren.get(1)));
             } else if (name.equals("negate")) {
-                // TODO: your code here
-                throw new NotYetImplementedException();
+                return -(toDoubleHelper(variables, nodeChildren.get(0)));
             } else if (name.equals("sin")) {
-                // TODO: your code here
-                throw new NotYetImplementedException();
+                return Math.sin(toDoubleHelper(variables, nodeChildren.get(0)));
             } else if (name.equals("cos")) {
-                // TODO: your code here
-                throw new NotYetImplementedException();
+                return Math.cos(toDoubleHelper(variables, nodeChildren.get(0)));
             } else {
                 throw new EvaluationError("Unknown operation: " + name);
             }
