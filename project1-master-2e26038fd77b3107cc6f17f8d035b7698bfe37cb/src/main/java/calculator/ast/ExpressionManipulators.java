@@ -32,14 +32,14 @@ public class ExpressionManipulators {
         // There are three types of nodes, so we have three cases.
         if (node.isNumber()) {
             // TODO: your code here
-            throw new NotYetImplementedException();
+            return node.getNumericValue();
         } else if (node.isVariable()) {
             if (!variables.containsKey(node.getName())) {
                 // If the expression contains an undefined variable, we give up.
                 throw new EvaluationError("Undefined variable: " + node.getName());
             }
             // TODO: your code here
-            throw new NotYetImplementedException();
+            return variables.get(node.getName());
         } else {
             String name = node.getName();
 
