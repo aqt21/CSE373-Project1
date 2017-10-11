@@ -2,7 +2,6 @@ package calculator.ast;
 
 import calculator.interpreter.Environment;
 import calculator.errors.EvaluationError;
-import datastructures.concrete.DoubleLinkedList;
 import datastructures.interfaces.IDictionary;
 import datastructures.interfaces.IList;
 import misc.exceptions.NotYetImplementedException;
@@ -81,19 +80,18 @@ public class ExpressionManipulators {
         //         to your "toDouble" method
         // Hint 2: When you're implementing constant folding, you may want
         //         to call your "toDouble" method in some way
-        
+
         return simplifyHelper(env.getVariables(), node.getChildren().get(0));
         // TODO: Your code here
     }
-    
-    private static AstNode simplifyHelper(IDictionary<String, AstNode> variables, AstNode node) {
+
+    public static AstNode simplifyHelper(IDictionary<String, AstNode> variables, AstNode node) {
         if (node.isNumber()) {
             // TODO: your code here
             return node;
-            
         } else if (node.isVariable()) {
             if (variables.containsKey(node.getName())) {
-                return simplifyHelper(variables, variables.get(node.getName()));
+                return variables.get(node.getName());
             } else {
                 return node;
             }
@@ -101,30 +99,40 @@ public class ExpressionManipulators {
             String name = node.getName();
             // TODO: your code here
             IList<AstNode> nodeChildren = node.getChildren();
-            nodeChildren.set(0, simplifyHelper(variables, nodeChildren.get(0)));
-            if(nodeChildren.size() == 2) {
-                nodeChildren.set(1, simplifyHelper(variables, nodeChildren.get(1)));
+            AstNode firstNode = simplifyHelper(variables, nodeChildren.get(0));
+            AstNode secondNode = null;
+            if (nodeChildren.size() == 2) {
+                secondNode = simplifyHelper(variables, nodeChildren.get(1));
             }
-                if (name.equals("+")) {              
-                    if (checkNumbers(nodeChildren)) {
-                       return (new AstNode(nodeChildren.get(0).getNumericValue() + nodeChildren.get(1).getNumericValue()));
-                    }
-                } else if (name.equals("-")) {
-                    if (checkNumbers(nodeChildren)) {
-                       return (new AstNode(nodeChildren.get(0).getNumericValue() - nodeChildren.get(1).getNumericValue()));
-                    }
-                } else if (name.equals("*")) {
-                    if (checkNumbers(nodeChildren)) {
-                       return (new AstNode(nodeChildren.get(0).getNumericValue() * nodeChildren.get(1).getNumericValue()));
-                    }
+            if (name.equals("+")) {
+                // TODO: your code here
+                if (checkNumbers(firstNode, secondNode)) {
+                    return (new AstNode(firstNode.getNumericValue() + secondNode.getNumericValue()));
                 }
+            } else if (name.equals("-")) {
+                // TODO: your code here
+                if (checkNumbers(firstNode, secondNode)) {
+                    return (new AstNode(firstNode.getNumericValue() - secondNode.getNumericValue()));
+                }
+            } else if (name.equals("*")) {
+                // TODO: your code here
+                if (checkNumbers(firstNode, secondNode)) {
+                    return (new AstNode(firstNode.getNumericValue() * secondNode.getNumericValue()));
+                }
+            }
+            nodeChildren.set(0, firstNode);
+            if (nodeChildren.size() == 2) {
+                nodeChildren.set(1, secondNode);
+            }
+
             return node;
         }
     }
-    
-    private static boolean checkNumbers(IList<AstNode> children) {
-        return children.get(0).isNumber() && children.get(1).isNumber();
+
+    private static boolean checkNumbers(AstNode first, AstNode second) {
+        return first.isNumber() && second.isNumber();
     }
+
     /**
      * Expected signature of plot:
      *
