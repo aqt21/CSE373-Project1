@@ -6,7 +6,6 @@ import calculator.gui.ImageDrawer;
 import datastructures.concrete.DoubleLinkedList;
 import datastructures.interfaces.IDictionary;
 import datastructures.interfaces.IList;
-import misc.exceptions.NotYetImplementedException;
 
 /**
  * All of the static methods in this class are given the exact same parameters for
@@ -34,35 +33,26 @@ public class ExpressionManipulators {
     private static double toDoubleHelper(IDictionary<String, AstNode> variables, AstNode node) {
         // There are three types of nodes, so we have three cases.
         if (node.isNumber()) {
-            // TODO: your code here
             return node.getNumericValue();
         } else if (node.isVariable()) {
             if (!variables.containsKey(node.getName())) {
                 // If the expression contains an undefined variable, we give up.
                 throw new EvaluationError("Undefined variable: " + node.getName());
             }
-            // TODO: your code here
             return toDoubleHelper(variables, variables.get(node.getName()));
         } else {
             String name = node.getName();
-
-            // TODO: your code here
             IList<AstNode> nodeChildren = node.getChildren();
 
             if (name.equals("+")) {
-                // TODO: your code here
                 return toDoubleHelper(variables, nodeChildren.get(0)) + toDoubleHelper(variables, nodeChildren.get(1));
             } else if (name.equals("-")) {
-                // TODO: your code here
                 return toDoubleHelper(variables, nodeChildren.get(0)) - toDoubleHelper(variables, nodeChildren.get(1));
             } else if (name.equals("*")) {
-                // TODO: your code here
                 return toDoubleHelper(variables, nodeChildren.get(0)) * toDoubleHelper(variables, nodeChildren.get(1));
             } else if (name.equals("/")) {
-                // TODO: your code here
                 return toDoubleHelper(variables, nodeChildren.get(0)) / toDoubleHelper(variables, nodeChildren.get(1));
             } else if (name.equals("^")) {
-                // TODO: your code here
                 return Math.pow(toDoubleHelper(variables, nodeChildren.get(0)), toDoubleHelper(variables, nodeChildren.get(1)));
             } else if (name.equals("negate")) {
                 return -(toDoubleHelper(variables, nodeChildren.get(0)));
@@ -84,12 +74,10 @@ public class ExpressionManipulators {
         //         to call your "toDouble" method in some way
 
         return simplifyHelper(env.getVariables(), node.getChildren().get(0));
-        // TODO: Your code here
     }
 
     public static AstNode simplifyHelper(IDictionary<String, AstNode> variables, AstNode node) {
         if (node.isNumber()) {
-            // TODO: your code here
             return node;
         } else if (node.isVariable()) {
             if (variables.containsKey(node.getName())) {
@@ -99,7 +87,6 @@ public class ExpressionManipulators {
             }
         } else {
             String name = node.getName();
-            // TODO: your code here
             IList<AstNode> nodeChildren = node.getChildren();
             AstNode firstNode = simplifyHelper(variables, nodeChildren.get(0));
             AstNode secondNode = null;
@@ -107,17 +94,14 @@ public class ExpressionManipulators {
                 secondNode = simplifyHelper(variables, nodeChildren.get(1));
             }
             if (name.equals("+")) {
-                // TODO: your code here
                 if (checkNumbers(firstNode, secondNode)) {
                     return (new AstNode(firstNode.getNumericValue() + secondNode.getNumericValue()));
                 }
             } else if (name.equals("-")) {
-                // TODO: your code here
                 if (checkNumbers(firstNode, secondNode)) {
                     return (new AstNode(firstNode.getNumericValue() - secondNode.getNumericValue()));
                 }
             } else if (name.equals("*")) {
-                // TODO: your code here
                 if (checkNumbers(firstNode, secondNode)) {
                     return (new AstNode(firstNode.getNumericValue() * secondNode.getNumericValue()));
                 }
@@ -177,36 +161,40 @@ public class ExpressionManipulators {
         //
         // When working on this method, you should uncomment the following line:
         //
-        
-        
+
         return plotHelper(env.getVariables(), node, env.getImageDrawer());
     }
-    
+
     public static AstNode plotHelper(IDictionary<String, AstNode> variables, AstNode node, ImageDrawer currImage) {
         DoubleLinkedList<Double> xValues = new DoubleLinkedList<>();
         DoubleLinkedList<Double> yValues = new DoubleLinkedList<>();
-        
+
         IList<AstNode> plotData = node.getChildren();
         AstNode exprToPlot = plotData.get(0);
         AstNode var = plotData.get(1);
-        AstNode varMin = plotData.get(2);
-        AstNode varMax = plotData.get(3);
-        AstNode step = plotData.get(4);
-        
-        if(step.isVariable()) {
-            step = variables.get(step.getName());
+        double varMin = toDoubleHelper(variables, plotData.get(2));
+        double varMax = toDoubleHelper(variables, plotData.get(3));
+        double step = toDoubleHelper(variables, plotData.get(4));
+
+        if (varMin > varMax) {
+            throw new EvaluationError("Minimum ___ greater than maximun");
         }
-        
-        for(double i = toDoubleHelper(variables, varMin); i <= toDoubleHelper(variables, varMax); i += toDoubleHelper(variables, step) ) {
+        if (variables.containsKey(var.getName())) {
+            throw new EvaluationError("Variable already defined");
+        }
+        if (step <= 0) {
+            throw new EvaluationError("Increment is zero or negative");
+        }
+
+        for(double i = varMin; i <= varMax; i += step) {
             xValues.add(i);
             variables.put(var.getName(), new AstNode(i));
             yValues.add(toDoubleHelper(variables, exprToPlot));
             variables.remove(var.getName());
         }
-        
+
         currImage.drawScatterPlot("", "x", "y", xValues, yValues);
-        
+
         return exprToPlot;
     }
-
 }
