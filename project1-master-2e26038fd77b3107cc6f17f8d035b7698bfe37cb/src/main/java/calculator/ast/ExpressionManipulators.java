@@ -2,6 +2,8 @@ package calculator.ast;
 
 import calculator.interpreter.Environment;
 import calculator.errors.EvaluationError;
+import calculator.gui.ImageDrawer;
+import datastructures.concrete.DoubleLinkedList;
 import datastructures.interfaces.IDictionary;
 import datastructures.interfaces.IList;
 import misc.exceptions.NotYetImplementedException;
@@ -166,8 +168,6 @@ public class ExpressionManipulators {
      * @throws EvaluationError  if 'step' is zero or negative
      */
     public static AstNode plot(Environment env, AstNode node) {
-        throw new NotYetImplementedException();
-
         // Note: every single function we add MUST return an
         // AST node that your "simplify" function is capable of handling.
         // However, your "simplify" function doesn't really know what to do
@@ -177,6 +177,36 @@ public class ExpressionManipulators {
         //
         // When working on this method, you should uncomment the following line:
         //
-        // return new AstNode(1);
+        
+        
+        return plotHelper(env.getVariables(), node, env.getImageDrawer());
     }
+    
+    public static AstNode plotHelper(IDictionary<String, AstNode> variables, AstNode node, ImageDrawer currImage) {
+        DoubleLinkedList<Double> xValues = new DoubleLinkedList<>();
+        DoubleLinkedList<Double> yValues = new DoubleLinkedList<>();
+        
+        IList<AstNode> plotData = node.getChildren();
+        AstNode exprToPlot = plotData.get(0);
+        AstNode var = plotData.get(1);
+        AstNode varMin = plotData.get(2);
+        AstNode varMax = plotData.get(3);
+        AstNode step = plotData.get(4);
+        
+        if(step.isVariable()) {
+            step = variables.get(step.getName());
+        }
+        
+        for(double i = toDoubleHelper(variables, varMin); i <= toDoubleHelper(variables, varMax); i += toDoubleHelper(variables, step) ) {
+            xValues.add(i);
+            variables.put(var.getName(), new AstNode(i));
+            yValues.add(toDoubleHelper(variables, exprToPlot));
+            variables.remove(var.getName());
+        }
+        
+        currImage.drawScatterPlot("", "x", "y", xValues, yValues);
+        
+        return exprToPlot;
+    }
+
 }
