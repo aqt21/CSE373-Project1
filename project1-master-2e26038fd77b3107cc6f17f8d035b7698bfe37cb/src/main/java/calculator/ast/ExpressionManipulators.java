@@ -26,7 +26,7 @@ public class ExpressionManipulators {
     public static AstNode toDouble(Environment env, AstNode node) {
         // To help you get started, we've implemented this method for you.
         // You should fill in the TODOs in the 'toDoubleHelper' method.
-        return new AstNode(toDoubleHelper(env.getVariables(), node));
+        return new AstNode(toDoubleHelper(env.getVariables(), node.getChildren().get(0)));
     }
 
     private static double toDoubleHelper(IDictionary<String, AstNode> variables, AstNode node) {
@@ -40,13 +40,13 @@ public class ExpressionManipulators {
                 throw new EvaluationError("Undefined variable: " + node.getName());
             }
             // TODO: your code here
-            return variables.get(node.getName()).getNumericValue();
+            return toDoubleHelper(variables, node.getChildren().get(0));
         } else {
             String name = node.getName();
 
             // TODO: your code here
             IList<AstNode> nodeChildren = node.getChildren();
-            
+
             if (name.equals("+")) {
                 // TODO: your code here
                 return toDoubleHelper(variables, nodeChildren.get(0)) + toDoubleHelper(variables, nodeChildren.get(1));
@@ -80,11 +80,56 @@ public class ExpressionManipulators {
         //         to your "toDouble" method
         // Hint 2: When you're implementing constant folding, you may want
         //         to call your "toDouble" method in some way
-
+        
+        return simplifyHelper(env.getVariables(), node.getChildren().get(0));
         // TODO: Your code here
-        throw new NotYetImplementedException();
     }
-
+    
+    public static AstNode simplifyHelper(IDictionary<String, AstNode> variables, AstNode node) {
+        if (node.getChildren().size() < 2) {
+            // TODO: your code here
+            return node;
+            
+        } else if (node.isVariable()) {
+            if (variables.containsKey(node.getName())) {
+                return new AstNode(variables.get(node.getName()).getNumericValue());
+            } else {
+                return node;
+            }
+        } else {
+            String name = node.getName();
+            // TODO: your code here
+            IList<AstNode> nodeChildren = node.getChildren();
+            
+            if (name.equals("+")) {
+                // TODO: your code here
+                AstNode firstNode = simplifyHelper(variables, nodeChildren.get(0));
+                AstNode secondNode = simplifyHelper(variables, nodeChildren.get(1));
+                if (firstNode.isNumber() 
+                        && secondNode.isNumber()) {
+                   return (new AstNode(firstNode.getNumericValue() + secondNode.getNumericValue()));
+                }
+                
+            } else if (name.equals("-")) {
+                // TODO: your code here
+                AstNode firstNode = simplifyHelper(variables, nodeChildren.get(0));
+                AstNode secondNode = simplifyHelper(variables, nodeChildren.get(1));
+                if (firstNode.isNumber() 
+                        && secondNode.isNumber()) {
+                   return (new AstNode(firstNode.getNumericValue() - secondNode.getNumericValue()));
+                }
+            } else if (name.equals("*")) {
+                // TODO: your code here
+                AstNode firstNode = simplifyHelper(variables, nodeChildren.get(0));
+                AstNode secondNode = simplifyHelper(variables, nodeChildren.get(1));
+                if (firstNode.isNumber() 
+                        && secondNode.isNumber()) {
+                   return (new AstNode(firstNode.getNumericValue() * secondNode.getNumericValue()));
+                }
+            }
+            return node;
+        }
+    }
     /**
      * Expected signature of plot:
      *
