@@ -2,6 +2,7 @@ package calculator.ast;
 
 import calculator.interpreter.Environment;
 import calculator.errors.EvaluationError;
+import datastructures.concrete.DoubleLinkedList;
 import datastructures.interfaces.IDictionary;
 import datastructures.interfaces.IList;
 import misc.exceptions.NotYetImplementedException;
@@ -40,7 +41,7 @@ public class ExpressionManipulators {
                 throw new EvaluationError("Undefined variable: " + node.getName());
             }
             // TODO: your code here
-            return toDoubleHelper(variables, node.getChildren().get(0));
+            return toDoubleHelper(variables, variables.get(node.getName()));
         } else {
             String name = node.getName();
 
@@ -85,14 +86,14 @@ public class ExpressionManipulators {
         // TODO: Your code here
     }
     
-    public static AstNode simplifyHelper(IDictionary<String, AstNode> variables, AstNode node) {
-        if (node.getChildren().size() < 2) {
+    private static AstNode simplifyHelper(IDictionary<String, AstNode> variables, AstNode node) {
+        if (node.isNumber()) {
             // TODO: your code here
             return node;
             
         } else if (node.isVariable()) {
             if (variables.containsKey(node.getName())) {
-                return new AstNode(variables.get(node.getName()).getNumericValue());
+                return simplifyHelper(variables, variables.get(node.getName()));
             } else {
                 return node;
             }
@@ -100,35 +101,29 @@ public class ExpressionManipulators {
             String name = node.getName();
             // TODO: your code here
             IList<AstNode> nodeChildren = node.getChildren();
-            
-            if (name.equals("+")) {
-                // TODO: your code here
-                AstNode firstNode = simplifyHelper(variables, nodeChildren.get(0));
-                AstNode secondNode = simplifyHelper(variables, nodeChildren.get(1));
-                if (firstNode.isNumber() 
-                        && secondNode.isNumber()) {
-                   return (new AstNode(firstNode.getNumericValue() + secondNode.getNumericValue()));
-                }
-                
-            } else if (name.equals("-")) {
-                // TODO: your code here
-                AstNode firstNode = simplifyHelper(variables, nodeChildren.get(0));
-                AstNode secondNode = simplifyHelper(variables, nodeChildren.get(1));
-                if (firstNode.isNumber() 
-                        && secondNode.isNumber()) {
-                   return (new AstNode(firstNode.getNumericValue() - secondNode.getNumericValue()));
-                }
-            } else if (name.equals("*")) {
-                // TODO: your code here
-                AstNode firstNode = simplifyHelper(variables, nodeChildren.get(0));
-                AstNode secondNode = simplifyHelper(variables, nodeChildren.get(1));
-                if (firstNode.isNumber() 
-                        && secondNode.isNumber()) {
-                   return (new AstNode(firstNode.getNumericValue() * secondNode.getNumericValue()));
-                }
+            nodeChildren.set(0, simplifyHelper(variables, nodeChildren.get(0)));
+            if(nodeChildren.size() == 2) {
+                nodeChildren.set(1, simplifyHelper(variables, nodeChildren.get(1)));
             }
+                if (name.equals("+")) {              
+                    if (checkNumbers(nodeChildren)) {
+                       return (new AstNode(nodeChildren.get(0).getNumericValue() + nodeChildren.get(1).getNumericValue()));
+                    }
+                } else if (name.equals("-")) {
+                    if (checkNumbers(nodeChildren)) {
+                       return (new AstNode(nodeChildren.get(0).getNumericValue() - nodeChildren.get(1).getNumericValue()));
+                    }
+                } else if (name.equals("*")) {
+                    if (checkNumbers(nodeChildren)) {
+                       return (new AstNode(nodeChildren.get(0).getNumericValue() * nodeChildren.get(1).getNumericValue()));
+                    }
+                }
             return node;
         }
+    }
+    
+    private static boolean checkNumbers(IList<AstNode> children) {
+        return children.get(0).isNumber() && children.get(1).isNumber();
     }
     /**
      * Expected signature of plot:
