@@ -150,7 +150,10 @@ public class DoubleLinkedList<T> implements IList<T> {
             }
             Node<T> nextNode = tempNode.next;
             Node<T> prevNode = tempNode.prev;
-            if (tempNode == this.front) {
+            if (tempNode == this.front && tempNode == this.back) {
+                this.front = null;
+                this.back = null;
+            } else if (tempNode == this.front) {
                 nextNode.prev = null;
                 this.front = nextNode;
             } else if (tempNode == this.back) {

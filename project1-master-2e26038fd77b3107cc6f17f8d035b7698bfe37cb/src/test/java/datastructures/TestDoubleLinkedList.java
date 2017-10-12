@@ -538,6 +538,15 @@ public class TestDoubleLinkedList extends BaseTest {
     }
     
     @Test(timeout=SECOND)
+    public void testDeleteSingleItem() {
+        IList<String> list = this.makeInstance();
+        list.add("a");
+        list.delete(0);
+        this.assertListMatches(new String[] {}, list);
+        assertEquals(0, list.size());
+    }
+    
+    @Test(timeout=SECOND)
     public void testDeleteFromFront() {
         IList<String> list = this.makeBasicList();
         list.delete(0);
@@ -609,11 +618,23 @@ public class TestDoubleLinkedList extends BaseTest {
         }
     }
     
-    @Test(timeout=SECOND)
+    @Test(timeout=15 * SECOND)
     public void testDeleteSizeUpdate() {
-        IList<String> list = this.makeBasicList();
-        list.delete(1);
-        assertEquals(2, list.size());
+        IList<Integer> list = this.makeInstance();
+        int cap = 5000000;
+        for (int i = 0; i < cap; i++) {
+            list.insert(0, i * 2);
+        }
+        assertEquals(cap, list.size());
+        
+        list.delete(0);
+        assertEquals(cap - 1, list.size());
+        
+        list.delete(cap - 2);
+        assertEquals(cap - 2, list.size());
+        
+        list.delete(50);
+        assertEquals(cap - 3, list.size());
     }
     
     @Test(timeout=SECOND)

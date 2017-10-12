@@ -26,7 +26,6 @@ public class ExpressionManipulators {
      */
     public static AstNode toDouble(Environment env, AstNode node) {
         // To help you get started, we've implemented this method for you.
-        // You should fill in the TODOs in the 'toDoubleHelper' method.
         return new AstNode(toDoubleHelper(env.getVariables(), node.getChildren().get(0)));
     }
 
@@ -53,7 +52,8 @@ public class ExpressionManipulators {
             } else if (name.equals("/")) {
                 return toDoubleHelper(variables, nodeChildren.get(0)) / toDoubleHelper(variables, nodeChildren.get(1));
             } else if (name.equals("^")) {
-                return Math.pow(toDoubleHelper(variables, nodeChildren.get(0)), toDoubleHelper(variables, nodeChildren.get(1)));
+                return Math.pow(toDoubleHelper(variables, nodeChildren.get(0)), 
+                                toDoubleHelper(variables, nodeChildren.get(1)));
             } else if (name.equals("negate")) {
                 return -(toDoubleHelper(variables, nodeChildren.get(0)));
             } else if (name.equals("sin")) {
@@ -166,8 +166,8 @@ public class ExpressionManipulators {
     }
 
     public static AstNode plotHelper(IDictionary<String, AstNode> variables, AstNode node, ImageDrawer currImage) {
-        DoubleLinkedList<Double> xValues = new DoubleLinkedList<>();
-        DoubleLinkedList<Double> yValues = new DoubleLinkedList<>();
+        IList<Double> xValues = new DoubleLinkedList<>();
+        IList<Double> yValues = new DoubleLinkedList<>();
 
         IList<AstNode> plotData = node.getChildren();
         AstNode exprToPlot = plotData.get(0);
@@ -186,7 +186,7 @@ public class ExpressionManipulators {
             throw new EvaluationError("Increment is zero or negative");
         }
 
-        for(double i = varMin; i <= varMax; i += step) {
+        for (double i = varMin; i <= varMax; i += step) {
             xValues.add(i);
             variables.put(var.getName(), new AstNode(i));
             yValues.add(toDoubleHelper(variables, exprToPlot));
